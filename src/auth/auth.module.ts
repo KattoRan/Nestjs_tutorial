@@ -9,15 +9,15 @@ import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    UsersModule, // Import UsersModule để dùng UsersService
+    UsersModule,
     PassportModule,
-    ConfigModule, // Đảm bảo ConfigModule được load để đọc .env
+    ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '60m' }, // Token hết hạn sau 60 phút
+        signOptions: { expiresIn: '60m' },
       }),
     }),
   ],

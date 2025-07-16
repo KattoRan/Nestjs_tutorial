@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { ConfigService } from '@nestjs/config';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -17,10 +17,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  /**
-   * Validate sẽ được gọi nếu token hợp lệ.
-   * Trả về object sẽ được gắn vào req.user
-   */
   async validate(payload: { sub: number; email: string }) {
     const user = await this.usersService.findOne(payload.email);
     if (!user) {

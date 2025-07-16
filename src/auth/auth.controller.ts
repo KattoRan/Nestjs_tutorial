@@ -8,23 +8,25 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @Controller('api/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
   @Post('signup')
   async signup(@Body() signUpDto: SignUpDto) {
     return this.authService.signUp(signUpDto);
   }
+
   @Post('sign-in')
   async signin(@Body() signInDto: SignInDto) {
     const {email, password} = signInDto;
     const user = await this.authService.validateUser(email,password);
     if (!user)
     {
-      throw new UnauthorizedException("Không lấy được thông tin người dùng");
+      throw new UnauthorizedException("Thông tin đăng nhập ko hợp lệ");
     }
     return this.authService.login(user);
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt')) // Áp dụng Guard
+  @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
