@@ -1,6 +1,13 @@
 {
   "editor.formatOnSave": true,
+  "editor.formatOnType": true,
   "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.cursorStyle": "line",
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorSmoothCaretAnimation": true,
   "files.exclude": {
     "**/.git": true,
     "**/node_modules": true,
