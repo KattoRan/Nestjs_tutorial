@@ -23,10 +23,8 @@ export class UpdateUserDto {
   password?: string;
 
   @ValidateIf((o) => o.password !== undefined)
-  @IsNotEmpty({ message: 'Vui lòng nhập lại mật khẩu để xác nhận' })
-  @Validate(IsPasswordMatchingConstraint, {
-    message: 'Mật khẩu không khớp',
-  })
+  @IsNotEmpty({ message: 'Mật khẩu không được bỏ trống'})
+  @Validate(IsPasswordMatchingConstraint)
   passwordConfirmation?: string;
 
   @IsOptional()

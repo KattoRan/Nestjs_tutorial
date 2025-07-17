@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { BCRYPT_SALT_ROUNDS } from 'src/constants/bcrypt.constant';
 
 @Injectable()
 export class UsersService {
@@ -28,11 +29,11 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
-    if (user) {
-      const { password, ...result } = user;
-      return result;
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy người dùng');
     }
-    return null;
+    const { password, ...result } = user;
+    return result;
   }
 
   async create(data: Prisma.UserCreateInput): Promise<User> {
@@ -57,10 +58,9 @@ export class UsersService {
     }
 
     if (updateUserDto.password) {
-      const saltRounds = 10;
       dataToUpdate.password = await bcrypt.hash(
         updateUserDto.password,
-        saltRounds,
+        BCRYPT_SALT_ROUNDS,
       );
     }
     
@@ -72,5 +72,4 @@ export class UsersService {
     const { password, ...result } = updatedUser;
     return result;
   }
-
 }
