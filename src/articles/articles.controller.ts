@@ -8,6 +8,7 @@ import {
   Post,
   UseGuards,
   Body,
+  Query,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -15,38 +16,39 @@ import { CreateArticleDto } from './dto/create-article.dto';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'generated/prisma';
+import { PaginationDto } from 'src/common/pagination.dto';
 
-@Controller('api')
+@Controller('api/articles')
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
-  @Get('articles/all')
-  GetListArticles() {
-    return this.articlesService.findAll();
+  @Get('all')
+  getListArticles(@Query() paginationDto: PaginationDto) {
+    return this.articlesService.findAll(paginationDto);
   }
 
-  @Get('articles/:slug')
+  @Get(':slug')
   findOneBySlug(@Param('slug') slug: string) {
     return this.articlesService.findBySlug(slug);
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Post('articles')
+  @Post('')
   create(@Body() createArticleDto: CreateArticleDto, @GetUser() user: User) {
     return this.articlesService.create(createArticleDto, user.id);
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Get('articles')
-  GetMyArticles(@GetUser() user: User) {
-    return this.articlesService.findDrafts(user.id);
+  @Get('')
+  getMyArticles(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
+    return this.articlesService.findUserArticles(user.id, paginationDto);
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Put('articles/:slug')
+  @Put(':slug')
   update(
     @Param('slug') slug: string,
     @Body() createArticleDto: CreateArticleDto,
@@ -57,7 +59,7 @@ export class ArticlesController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Delete('articles/:slug')
+  @Delete(':slug')
   delete(@Param('slug') slug: string, @GetUser() user: User) {
     return this.articlesService.delete(slug, user.id);
   }
