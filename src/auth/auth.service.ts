@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { SignUpDto } from './dto/signup.dto';
 import { User } from '@prisma/client';
 import { SignInDto } from './dto/signin.dto';
+import { BCRYPT_SALT_ROUNDS } from 'src/constants/bcrypt.constant';
 
 @Injectable()
 export class AuthService {
@@ -29,8 +30,7 @@ export class AuthService {
       throw new ConflictException('Username đã tồn tại');
     }
 
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS,);
 
     const user = await this.usersService.create({
       email,
