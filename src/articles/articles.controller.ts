@@ -27,6 +27,13 @@ export class ArticlesController {
     return this.articlesService.findAll(paginationDto);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  getMyArticles(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
+    return this.articlesService.findUserArticles(user.id, paginationDto);
+  }
+
   @Get(':slug')
   findBySlug(@Param('slug') slug: string) {
     return this.articlesService.findBySlug(slug);
@@ -37,13 +44,6 @@ export class ArticlesController {
   @Post()
   create(@Body() createArticleDto: CreateArticleDto, @GetUser() user: User) {
     return this.articlesService.create(createArticleDto, user.id);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @Get('me')
-  getMyArticles(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
-    return this.articlesService.findUserArticles(user.id, paginationDto);
   }
 
   @ApiBearerAuth()
@@ -62,5 +62,19 @@ export class ArticlesController {
   @Delete(':slug')
   delete(@Param('slug') slug: string, @GetUser() user: User) {
     return this.articlesService.delete(slug, user.id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/:slug/favorite')
+  async favorite(@GetUser() user: User, @Param('slug') slug: string) {
+    return this.articlesService.favorite(slug, user.id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('/:slug/favorite')
+  async unfavorite(@GetUser() user: User, @Param('slug') slug: string) {
+    return this.articlesService.unfavorite(slug, user.id);
   }
 }
