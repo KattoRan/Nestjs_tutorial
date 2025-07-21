@@ -22,26 +22,26 @@ import { PaginationDto } from 'src/common/pagination.dto';
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
-  @Get('all')
+  @Get()
   getListArticles(@Query() paginationDto: PaginationDto) {
     return this.articlesService.findAll(paginationDto);
   }
 
   @Get(':slug')
-  findOneBySlug(@Param('slug') slug: string) {
+  findBySlug(@Param('slug') slug: string) {
     return this.articlesService.findBySlug(slug);
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Post('')
+  @Post()
   create(@Body() createArticleDto: CreateArticleDto, @GetUser() user: User) {
     return this.articlesService.create(createArticleDto, user.id);
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Get('')
+  @Get('me')
   getMyArticles(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
     return this.articlesService.findUserArticles(user.id, paginationDto);
   }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateArticleDto {
   @ApiProperty()
@@ -16,4 +16,9 @@ export class CreateArticleDto {
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  @ApiProperty({ required: false, default: false })
+  @IsOptional()
+  @IsBoolean()
+  published?: boolean = false;
 }

@@ -10,6 +10,7 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import slugify from 'slugify';
 import { skip } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination.dto';
+import { DEFAULT_LIMIT, DEFAULT_PAGE } from 'src/constants/pagination.constant';
 
 @Injectable()
 export class ArticlesService {
@@ -40,12 +41,13 @@ export class ArticlesService {
   }
 
   async findAll(paginationDto: PaginationDto) {
-    const { page = 1, limit = 10 } = paginationDto;
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = paginationDto;
     const skip = (page - 1) * limit;
 
     const [total, articles] = await this.prisma.$transaction([
-      this.prisma.article.count(),
+      this.prisma.article.count({ where: { published: true } }),
       this.prisma.article.findMany({
+        where: { published: true },
         include: { author: { select: { username: true } } },
         skip,
         take: limit,
@@ -67,7 +69,7 @@ export class ArticlesService {
   }
 
   async findUserArticles(authorId: number, paginationDto: PaginationDto) {
-    const { page = 1, limit = 10 } = paginationDto;
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = paginationDto;
     const skip = (page - 1) * limit;
 
     const whereClause = { authorId: authorId };
@@ -107,7 +109,26 @@ export class ArticlesService {
     return article;
   }
 
-  private async validateArticleAccess(slug: string, userId: number) {
+  async update(
+    slug: string,
+    updateArticleDto: UpdateArticleDto,
+    userId: number,
+  ) {
+    await this.validateArticle(slug, userId);
+
+    return this.prisma.article.update({
+      where: { slug },
+      data: updateArticleDto,
+    });
+  }
+
+  async delete(slug: string, userId: number) {
+    await this.validateArticle(slug, userId);
+
+    return this.prisma.article.delete({ where: { slug } });
+  }
+
+  private async validateArticle(slug: string, userId: number) {
     const article = await this.prisma.article.findUnique({ where: { slug } });
 
     if (!article) {
@@ -121,24 +142,5 @@ export class ArticlesService {
     }
 
     return article;
-  }
-
-  async update(
-    slug: string,
-    updateArticleDto: UpdateArticleDto,
-    userId: number,
-  ) {
-    await this.validateArticleAccess(slug, userId);
-
-    return this.prisma.article.update({
-      where: { slug },
-      data: updateArticleDto,
-    });
-  }
-
-  async delete(slug: string, userId: number) {
-    await this.validateArticleAccess(slug, userId);
-
-    return this.prisma.article.delete({ where: { slug } });
   }
 }
