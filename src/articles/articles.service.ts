@@ -112,7 +112,7 @@ export class ArticlesService {
     });
     if (!article) {
       throw new NotFoundException(
-        await this.i18n.translate('articles.article_not_found'),
+        this.i18n.translate('articles.article_not_found'),
       );
     }
     return article;

@@ -6,8 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ArticlesModule } from './articles/articles.module';
 import { CommentsModule } from './comments/comments.module';
-import { AcceptLanguageResolver, I18nModule } from 'nestjs-i18n';
-import * as path from 'path';
+import { I18nModule } from 'nestjs-i18n';
+import { i18nConfig } from './config/i18n.config';
 
 @Module({
   imports: [
@@ -16,21 +16,7 @@ import * as path from 'path';
     UsersModule,
     ArticlesModule,
     CommentsModule,
-    I18nModule.forRoot({
-      fallbackLanguage: 'en',
-      loaderOptions: {
-        path: path.join(process.cwd(), 'src/i18n/'),
-        watch: true,
-      },
-      resolvers: [
-        {
-          use: AcceptLanguageResolver,
-          options: {
-            matchType: 'strict',
-          },
-        },
-      ],
-    }),
+    I18nModule.forRoot(i18nConfig),
   ],
   controllers: [AppController],
   providers: [AppService],
