@@ -11,13 +11,18 @@ import {
   Query,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'generated/prisma';
 import { PaginationDto } from 'src/common/pagination.dto';
 
+@ApiHeader({
+  name: 'Accept-Language',
+  description: 'Ngôn ngữ phản hồi (vi, en, ja)',
+  required: false,
+})
 @Controller('api/articles')
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}

@@ -12,10 +12,14 @@ import slugify from 'slugify';
 import { skip } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination.dto';
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from 'src/constants/pagination.constant';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class ArticlesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly i18n: I18nService,
+  ) {}
 
   async create(createArticleDto: CreateArticleDto, authorId: number) {
     const slug = slugify(createArticleDto.title, {
@@ -29,7 +33,9 @@ export class ArticlesService {
     });
 
     if (existingArticle) {
-      throw new ConflictException('Bài viết với tiêu đề này đã tồn tại');
+      throw new ConflictException(
+        this.i18n.translate('articles.article_title_exists'),
+      );
     }
 
     return this.prisma.article.create({
@@ -105,7 +111,9 @@ export class ArticlesService {
       include: { author: { select: { username: true } } },
     });
     if (!article) {
-      throw new NotFoundException(`Không tìm thấy bài viết.`);
+      throw new NotFoundException(
+        await this.i18n.translate('articles.article_not_found'),
+      );
     }
     return article;
   }
@@ -221,12 +229,14 @@ export class ArticlesService {
     const article = await this.prisma.article.findUnique({ where: { slug } });
 
     if (!article) {
-      throw new NotFoundException(`Không tìm thấy bài viết.`);
+      throw new NotFoundException(
+        this.i18n.translate('articles.article_not_found'),
+      );
     }
 
     if (article.authorId !== userId) {
       throw new ForbiddenException(
-        'Bạn không có quyền thực hiện hành động này!',
+        this.i18n.translate('articles.can_not_pemission'),
       );
     }
 

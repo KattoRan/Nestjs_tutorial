@@ -4,10 +4,14 @@ import { User, Prisma } from '@prisma/client';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { BCRYPT_SALT_ROUNDS } from 'src/constants/bcrypt.constant';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly i18n: I18nService,
+  ) {}
 
   async findOne(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
@@ -30,7 +34,7 @@ export class UsersService {
       where: { id },
     });
     if (!user) {
-      throw new NotFoundException('Không tìm thấy người dùng');
+      throw new NotFoundException(this.i18n.translate('user.user_not_found'));
     }
     const { password, ...result } = user;
     return result;
@@ -48,7 +52,7 @@ export class UsersService {
     if (updateUserDto.username) {
       dataToUpdate.username = updateUserDto.username;
     }
-    
+
     if (updateUserDto.bio) {
       dataToUpdate.bio = updateUserDto.bio;
     }
@@ -63,12 +67,12 @@ export class UsersService {
         BCRYPT_SALT_ROUNDS,
       );
     }
-    
+
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: dataToUpdate,
     });
-    
+
     const { password, ...result } = updatedUser;
     return result;
   }
