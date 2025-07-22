@@ -1,5 +1,7 @@
 {
   "article_title_exists": "Bài viết với tiêu đề này đã tồn tại.",
   "article_not_found": "Không tìm thấy bài viết.",
-  "can_not_pemission": "Bạn không có quyền thực hiện hành động này!"
+  "can_not_pemission": "Bạn không có quyền thực hiện hành động này!",
+  "liked": "Bạn đã thích bài viết này.",
+  "unliked": "Bạn chưa thích bài viết này"
 }

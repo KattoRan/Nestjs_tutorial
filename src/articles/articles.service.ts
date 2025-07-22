@@ -142,7 +142,7 @@ export class ArticlesService {
     const isFavorited = await this.validateFavorite(userId, article.id);
 
     if (isFavorited) {
-      throw new BadRequestException('Bạn đã thích bài viết này');
+      throw new BadRequestException(this.i18n.translate('articles.liked'));
     }
 
     const [favorite, updateArticle] = await this.prisma.$transaction([
@@ -179,7 +179,7 @@ export class ArticlesService {
     const isFavorited = await this.validateFavorite(userId, article.id);
 
     if (!isFavorited) {
-      throw new BadRequestException('Bạn chưa thích bài viết này');
+      throw new BadRequestException(this.i18n.translate('articles.unliked'));
     }
 
     const [favorite, updateArticle] = await this.prisma.$transaction([

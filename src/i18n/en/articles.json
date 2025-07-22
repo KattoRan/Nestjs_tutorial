@@ -1,5 +1,7 @@
 {
   "article_title_exists": "Article with this title already exists.",
   "article_not_found": "Article not found.",
-  "can_not_pemission": "You do not have permission to perform this action!"
+  "can_not_pemission": "You do not have permission to perform this action!",
+  "liked": "You liked this post.",
+  "unliked": "You haven't liked this post"
 }

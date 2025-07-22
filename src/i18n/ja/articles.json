@@ -1,5 +1,7 @@
 {
   "article_title_exists": "このタイトルの記事はすでに存在します。",
   "article_not_found": "記事が見つかりません。",
-  "can_not_pemission": "この操作を実行する権限がありません。"
+  "can_not_pemission": "この操作を実行する権限がありません。",
+  "liked": "この投稿が好きです。",
+  "unliked": "この投稿がまだ好きではありません。"
 }
