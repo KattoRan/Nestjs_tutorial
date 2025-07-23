@@ -5,10 +5,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly i18n: I18nService,
+  ) {}
 
   async create(
     slug: string,
@@ -83,11 +87,15 @@ export class CommentsService {
     });
 
     if (!comment) {
-      throw new NotFoundException('Không tìm thấy bình luận.');
+      throw new NotFoundException(
+        this.i18n.translate('comment.comment_not_found'),
+      );
     }
 
     if (comment.authorId !== userId) {
-      throw new BadRequestException('Bạn không có quyền xoá bình luận này');
+      throw new BadRequestException(
+        this.i18n.translate('comment.no_permission_delete_comment'),
+      );
     }
 
     return this.prisma.comment.delete({
@@ -99,7 +107,9 @@ export class CommentsService {
     const article = await this.prisma.article.findUnique({ where: { slug } });
 
     if (!article) {
-      throw new NotFoundException(`Không tìm thấy bài viết.`);
+      throw new NotFoundException(
+        this.i18n.translate('articles.article_not_found'),
+      );
     }
 
     return article;
