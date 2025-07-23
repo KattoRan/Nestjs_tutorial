@@ -1,3 +1,7 @@
 {
-  "user_not_found": "ユーザーが見つかりません"
+  "user_not_found": "ユーザーが見つかりません",
+  "cannot_follow_self": "自分自身をフォローすることはできません",
+  "already_following": "このユーザーはすでにフォローしています",
+  "cannot_unfollow_self": "自分自身のフォローを解除することはできません",
+  "not_following_user": "このユーザーをフォローしていません"
 }
