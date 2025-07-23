@@ -1,3 +1,7 @@
 {
-  "user_not_found": "Không tìm thấy người dùng"
+  "user_not_found": "Không tìm thấy người dùng",
+  "cannot_follow_self": "Bạn không thể tự theo dõi chính mình",
+  "already_following": "Bạn đã theo dõi người dùng này rồi",
+  "cannot_unfollow_self": "Bạn không thể bỏ theo dõi chính mình",
+  "not_following_user": "Bạn chưa theo dõi người dùng này"
 }
