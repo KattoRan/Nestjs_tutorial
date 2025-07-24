@@ -128,7 +128,9 @@ export class CommentsService {
   }
 
   private async validateArticleSlug(slug: string) {
-    const article = await this.prisma.article.findUnique({ where: { slug } });
+    const article = await this.prisma.article.findUnique({
+      where: { slug, published: true },
+    });
 
     if (!article) {
       throw new NotFoundException(

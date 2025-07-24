@@ -3,5 +3,7 @@
   "article_not_found": "Không tìm thấy bài viết.",
   "can_not_pemission": "Bạn không có quyền thực hiện hành động này!",
   "liked": "Bạn đã thích bài viết này.",
-  "unliked": "Bạn chưa thích bài viết này"
+  "unliked": "Bạn chưa thích bài viết này",
+  "no_articles_to_publish": "Hiện chưa có bài viết nào để xuất bản.",
+  "successfully_published_articles": "Xuất bản bài viết thành công."
 }

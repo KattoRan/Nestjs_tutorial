@@ -13,6 +13,8 @@ import { skip } from 'rxjs';
 import { PaginationDto } from 'src/common/pagination.dto';
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from 'src/constants/pagination.constant';
 import { I18nService } from 'nestjs-i18n';
+import { PublishArticlesDto } from './dto/publish-articles.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ArticlesService {
@@ -48,38 +50,32 @@ export class ArticlesService {
   }
 
   async findAll(paginationDto: PaginationDto) {
-    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = paginationDto;
-    const skip = (page - 1) * limit;
+    const whereClause: Prisma.ArticleWhereInput = { published: true };
 
-    const [total, articles] = await this.prisma.$transaction([
-      this.prisma.article.count({ where: { published: true } }),
-      this.prisma.article.findMany({
-        where: { published: true },
-        include: { author: { select: { username: true } } },
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-    ]);
-
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      data: articles,
-      meta: {
-        totalItems: total,
-        itemsPerPage: limit,
-        totalPages: totalPages,
-        currentPage: page,
-      },
-    };
+    return this._findArticlesWithPagination(whereClause, paginationDto);
   }
 
   async findUserArticles(authorId: number, paginationDto: PaginationDto) {
+    const whereClause: Prisma.ArticleWhereInput = {
+      authorId: authorId,
+      published: true,
+    };
+
+    return this._findArticlesWithPagination(whereClause, paginationDto);
+  }
+
+  async findMyArticles(authorId: number, paginationDto: PaginationDto) {
+    const whereClause: Prisma.ArticleWhereInput = { authorId: authorId };
+
+    return this._findArticlesWithPagination(whereClause, paginationDto);
+  }
+
+  private async _findArticlesWithPagination(
+    whereClause: Prisma.ArticleWhereInput,
+    paginationDto: PaginationDto,
+  ) {
     const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = paginationDto;
     const skip = (page - 1) * limit;
-
-    const whereClause = { authorId: authorId };
 
     const [total, articles] = await this.prisma.$transaction([
       this.prisma.article.count({ where: whereClause }),
@@ -105,16 +101,25 @@ export class ArticlesService {
     };
   }
 
-  async findBySlug(slug: string) {
+  async findBySlug(slug: string, userId?: number) {
     const article = await this.prisma.article.findUnique({
       where: { slug },
       include: { author: { select: { username: true } } },
     });
+
     if (!article) {
       throw new NotFoundException(
         this.i18n.translate('articles.article_not_found'),
       );
     }
+
+    if (!article.published) {
+      if (article.authorId !== userId)
+        throw new NotFoundException(
+          this.i18n.translate('articles.article_not_found'),
+        );
+    }
+
     return article;
   }
 
@@ -211,6 +216,38 @@ export class ArticlesService {
     ]);
 
     return updateArticle;
+  }
+
+  async publish(publishDto: PublishArticlesDto, userId: number) {
+    const { slugs } = publishDto;
+
+    const result = await this.prisma.article.updateMany({
+      where: {
+        slug: {
+          in: slugs,
+        },
+        authorId: userId,
+        published: false,
+      },
+      data: {
+        published: true,
+        updatedAt: new Date(),
+      },
+    });
+
+    if (result.count === 0) {
+      throw new BadRequestException(
+        this.i18n.translate('articles.no_articles_to_publish'),
+      );
+    }
+
+    const message = this.i18n.translate(
+      'articles.successfully_published_articles',
+    );
+    return {
+      message: message,
+      count: result.count,
+    };
   }
 
   private async validateFavorite(userId: number, articleId: number) {

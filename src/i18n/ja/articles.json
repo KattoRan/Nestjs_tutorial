@@ -3,5 +3,7 @@
   "article_not_found": "記事が見つかりません。",
   "can_not_pemission": "この操作を実行する権限がありません。",
   "liked": "この投稿が好きです。",
-  "unliked": "この投稿がまだ好きではありません。"
+  "unliked": "この投稿がまだ好きではありません。",
+  "no_articles_to_publish": "まだ公開できる記事がありません",
+  "successfully_published_articles": "件の記事を公開しました。"
 }
