@@ -54,7 +54,7 @@ export class ArticlesController {
   @UseGuards(AuthGuard('jwt'))
   @Patch('publish')
   publishArticles(
-    @Body() publishDto: PublishArticlesDto, // 3. Lấy và validate body với DTO
+    @Body() publishDto: PublishArticlesDto,
     @GetUser() user: User,
   ) {
     return this.articlesService.publish(publishDto, user.id);

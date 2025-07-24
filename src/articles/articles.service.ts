@@ -14,6 +14,7 @@ import { PaginationDto } from 'src/common/pagination.dto';
 import { DEFAULT_LIMIT, DEFAULT_PAGE } from 'src/constants/pagination.constant';
 import { I18nService } from 'nestjs-i18n';
 import { PublishArticlesDto } from './dto/publish-articles.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ArticlesService {
@@ -49,68 +50,32 @@ export class ArticlesService {
   }
 
   async findAll(paginationDto: PaginationDto) {
-    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = paginationDto;
-    const skip = (page - 1) * limit;
+    const whereClause: Prisma.ArticleWhereInput = { published: true };
 
-    const [total, articles] = await this.prisma.$transaction([
-      this.prisma.article.count({ where: { published: true } }),
-      this.prisma.article.findMany({
-        where: { published: true },
-        include: { author: { select: { username: true } } },
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-    ]);
-
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      data: articles,
-      meta: {
-        totalItems: total,
-        itemsPerPage: limit,
-        totalPages: totalPages,
-        currentPage: page,
-      },
-    };
+    return this._findArticlesWithPagination(whereClause, paginationDto);
   }
 
   async findUserArticles(authorId: number, paginationDto: PaginationDto) {
-    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = paginationDto;
-    const skip = (page - 1) * limit;
-
-    const whereClause = { authorId: authorId, published: true };
-
-    const [total, articles] = await this.prisma.$transaction([
-      this.prisma.article.count({ where: whereClause }),
-      this.prisma.article.findMany({
-        where: whereClause,
-        include: { author: { select: { username: true } } },
-        skip: skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-    ]);
-
-    const totalPages = Math.ceil(total / limit);
-
-    return {
-      data: articles,
-      meta: {
-        totalItems: total,
-        itemsPerPage: limit,
-        totalPages: totalPages,
-        currentPage: page,
-      },
+    const whereClause: Prisma.ArticleWhereInput = {
+      authorId: authorId,
+      published: true,
     };
+
+    return this._findArticlesWithPagination(whereClause, paginationDto);
   }
 
   async findMyArticles(authorId: number, paginationDto: PaginationDto) {
+    const whereClause: Prisma.ArticleWhereInput = { authorId: authorId };
+
+    return this._findArticlesWithPagination(whereClause, paginationDto);
+  }
+
+  private async _findArticlesWithPagination(
+    whereClause: Prisma.ArticleWhereInput,
+    paginationDto: PaginationDto,
+  ) {
     const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT } = paginationDto;
     const skip = (page - 1) * limit;
-
-    const whereClause = { authorId: authorId };
 
     const [total, articles] = await this.prisma.$transaction([
       this.prisma.article.count({ where: whereClause }),
