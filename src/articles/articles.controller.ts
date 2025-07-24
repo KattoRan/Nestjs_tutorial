@@ -9,6 +9,7 @@ import {
   UseGuards,
   Body,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
@@ -17,6 +18,8 @@ import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from 'generated/prisma';
 import { PaginationDto } from 'src/common/pagination.dto';
+import { OptionalJwtAuthGuard } from 'src/auth/optional-jwt-auth.guard';
+import { PublishArticlesDto } from './dto/publish-articles.dto';
 
 @ApiHeader({
   name: 'Accept-Language',
@@ -36,12 +39,32 @@ export class ArticlesController {
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   getMyArticles(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
-    return this.articlesService.findUserArticles(user.id, paginationDto);
+    return this.articlesService.findMyArticles(user.id, paginationDto);
   }
 
+  @Get('user/:id')
+  getUserArticles(
+    @Param('id') id: number,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.articlesService.findUserArticles(id, paginationDto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('publish')
+  publishArticles(
+    @Body() publishDto: PublishArticlesDto, // 3. Lấy và validate body với DTO
+    @GetUser() user: User,
+  ) {
+    return this.articlesService.publish(publishDto, user.id);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(OptionalJwtAuthGuard)
   @Get(':slug')
-  findBySlug(@Param('slug') slug: string) {
-    return this.articlesService.findBySlug(slug);
+  findBySlug(@Param('slug') slug: string, @GetUser() user: User) {
+    return this.articlesService.findBySlug(slug, user.id);
   }
 
   @ApiBearerAuth()
