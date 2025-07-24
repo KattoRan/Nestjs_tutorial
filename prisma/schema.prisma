@@ -44,6 +44,7 @@ model Article {
   author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
   comments Comment[]
+  commentsCount Int @default(0)
 
   favoritedBy Favorite[]
   favoriteCount Int @default(0)

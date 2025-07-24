@@ -21,33 +21,43 @@ export class CommentsService {
   ) {
     const article = await this.validateArticleSlug(slug);
 
-    const comment = await this.prisma.comment.create({
-      data: {
-        body: createCommentDto.body,
-        author: {
-          connect: { id: userId },
-        },
-        article: {
-          connect: { id: article.id },
-        },
-      },
-      select: {
-        id: true,
-        body: true,
-        createdAt: true,
-        updatedAt: true,
-        author: {
-          select: {
-            username: true,
-            bio: true,
-            avatar: true,
+    const [_, newComment] = await this.prisma.$transaction([
+      this.prisma.article.update({
+        where: { id: article.id },
+        data: {
+          commentsCount: {
+            increment: 1,
           },
         },
-      },
-    });
+      }),
+      this.prisma.comment.create({
+        data: {
+          body: createCommentDto.body,
+          author: {
+            connect: { id: userId },
+          },
+          article: {
+            connect: { id: article.id },
+          },
+        },
+        select: {
+          id: true,
+          body: true,
+          createdAt: true,
+          updatedAt: true,
+          author: {
+            select: {
+              username: true,
+              bio: true,
+              avatar: true,
+            },
+          },
+        },
+      }),
+    ]);
 
     return {
-      comment,
+      newComment,
     };
   }
 
@@ -98,9 +108,23 @@ export class CommentsService {
       );
     }
 
-    return this.prisma.comment.delete({
-      where: { id: commentId },
-    });
+    const [_, newComment] = await this.prisma.$transaction([
+      this.prisma.article.update({
+        where: { id: article.id },
+        data: {
+          commentsCount: {
+            decrement: 1,
+          },
+        },
+      }),
+      this.prisma.comment.delete({
+        where: { id: commentId },
+      }),
+    ]);
+
+    return {
+      newComment,
+    };
   }
 
   private async validateArticleSlug(slug: string) {
